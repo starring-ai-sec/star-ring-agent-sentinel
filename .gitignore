@@ -1,0 +1,15 @@
+# 私钥与内部签发工具（绝不能提交）
+.secrets/
+
+# Python
+__pycache__/
+*.pyc
+
+# 构建产物（exe 二进制上传到 Release，不进 git）
+build/
+dist/
+*.zip
+xh-scan.spec
+
+# 本地输出
+out/
