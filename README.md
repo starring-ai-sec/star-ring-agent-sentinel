@@ -25,9 +25,9 @@ We judge whether the action should happen *right before* tool execution.
 
 ## 🚀 Quick Start (Windows)
 
-1. Download `xh-scan.exe` from [Releases](<repo>/releases).
+1. Download `xh-scan.exe` from [Releases](https://github.com/starring-ai-sec/star-ring-agent-sentinel/releases).
 2. Run `xh-scan.exe --machine` to get your machine ID.
-3. Open an [Issue](<repo>/issues) (Template: **Free License**) with your machine ID.
+3. Open an [Issue](https://github.com/starring-ai-sec/star-ring-agent-sentinel/issues) (Template: **Free License**) with your machine ID.
 4. Put the returned `license.json` into the `license/` folder.
 5. Run: `xh-scan.exe --input your_logs.jsonl --out report.md`
 
@@ -99,9 +99,9 @@ MIT © 2026 Star-Ring AI Behavior Security Lab
 
 ## 🚀 快速开始 (Windows 平台)
 
-1. 前往 [Releases](<repo>/releases) 下载 `xh-scan.exe`。
+1. 前往 [Releases](https://github.com/starring-ai-sec/star-ring-agent-sentinel/releases) 下载 `xh-scan.exe`。
 2. 运行 `xh-scan.exe --machine` 获取机器码。
-3. 在 [Issues](<repo>/issues) 提交机器码，申请免费授权文件（模板：**申请免费授权**）。
+3. 在 [Issues](https://github.com/starring-ai-sec/star-ring-agent-sentinel/issues) 提交机器码，申请免费授权文件（模板：**申请免费授权**）。
 4. 把返回的 `license.json` 放入 `license/` 文件夹。
 5. 运行：`xh-scan.exe --input your_logs.jsonl --out report.md`
 

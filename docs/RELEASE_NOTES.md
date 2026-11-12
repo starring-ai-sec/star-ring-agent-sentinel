@@ -58,7 +58,7 @@ git commit -m "chore: release v1.0.0"
 ## 五、发布前最后核对
 
 - [ ] 仓库名：`star-ring-agent-sentinel`
-- [ ] README 里的 `<repo>` 占位符已替换为真实地址
+- [x] README 里的 `<repo>` 占位符已替换为真实地址
 - [ ] `assets/starr-ring-architecture.png` 已上传
 - [ ] `xh-scan.exe` 已打包并上传 Release（Tag v1.0.0）
 - [ ] 两个 Issue 模板已就位
