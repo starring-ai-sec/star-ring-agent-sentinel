@@ -5,9 +5,10 @@
 __pycache__/
 *.pyc
 
-# 构建产物（exe 二进制上传到 Release，不进 git）
+# 构建产物（exe 同时发布到 Release；网络受限时也可从仓库直接下载）
 build/
-dist/
+dist/*
+!dist/xh-scan.exe
 *.zip
 xh-scan.spec
 
