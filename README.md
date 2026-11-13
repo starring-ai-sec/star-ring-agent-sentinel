@@ -5,6 +5,8 @@
 > "Content moderation cares what the Agent **says**, we care what the Agent **does**."
 > A completely offline, locally-run behavior-chain self-check tool for AI Agents.
 
+![Demo](./assets/demo.gif)
+
 ![Star-Ring Architecture](./assets/starr-ring-architecture.png)
 
 ## 🚨 Why Behavior Security?
@@ -78,6 +80,8 @@ MIT © 2026 Star-Ring AI Behavior Security Lab
 
 > **内容安全管「Agent 说了什么」，我们管「Agent 做了什么」。**
 > 一个完全离线、本地运行的 AI Agent 行为链自检工具。
+
+![演示](./assets/demo.gif)
 
 ![星环架构](./assets/starr-ring-architecture.png)
 
