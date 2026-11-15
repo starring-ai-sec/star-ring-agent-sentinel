@@ -4,4 +4,4 @@
 from .callback import StarRingBlockedError, StarRingCallbackHandler
 
 __all__ = ["StarRingCallbackHandler", "StarRingBlockedError"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
