@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from datetime import datetime
@@ -69,7 +70,33 @@ def _to_actions(row: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [{"action_type": str(tool), "params": dict(row.get("params") or {})}]
 
 
-def _group_chains(rows: List[Dict[str, Any]], max_steps: int = 6) -> List[Dict[str, Any]]:
+def _ts_minutes(ts: str) -> int | None:
+    """时间戳 → 当天分钟数（取 HH:MM），解析失败返回 None。"""
+    if not ts:
+        return None
+    m = re.search(r"(\d{1,2}):(\d{2})", ts)
+    if not m:
+        return None
+    return int(m.group(1)) * 60 + int(m.group(2))
+
+
+def _gap_minutes(ts_a: str, ts_b: str) -> int | None:
+    """两个时间戳的分钟间隔（跨天自动 +1440），解析失败返回 None。"""
+    a, b = _ts_minutes(ts_a), _ts_minutes(ts_b)
+    if a is None or b is None:
+        return None
+    gap = b - a
+    return gap + 1440 if gap < 0 else gap
+
+
+def _group_chains(rows: List[Dict[str, Any]], max_steps: int = 6,
+                  window_min: int = 5, dedup: bool = True) -> List[Dict[str, Any]]:
+    """按 session 聚合，并做「连续去重（重试压缩）」+「时间窗口断开」。
+
+    - dedup：相邻两个动作类型相同 → 视为重试，只计一次；
+    - window_min：相邻动作时间间隔超过 N 分钟 → 断开成新链（避免整个 session
+      被聚成一条跨越数小时的巨链，误伤并发/异步任务）。
+    """
     buckets: Dict[str, List[Dict[str, Any]]] = {}
     for idx, row in enumerate(rows):
         key = str(row.get("session_id") or row.get("agent_id") or ("_row%d" % idx))
@@ -77,20 +104,35 @@ def _group_chains(rows: List[Dict[str, Any]], max_steps: int = 6) -> List[Dict[s
 
     chains: List[Dict[str, Any]] = []
     for key, items in buckets.items():
-        actions: List[Dict[str, Any]] = []
-        first_ts = ""
+        # 展开成带时间戳的动作序列
+        seq: List[tuple] = []
         for row in items:
-            if not first_ts:
-                first_ts = str(row.get("ts") or "")
-            actions.extend(_to_actions(row))
-        if not actions:
+            ts = str(row.get("ts") or "")
+            for a in _to_actions(row):
+                seq.append((ts, a))
+        if not seq:
             continue
+
+        cur: List[tuple] = [seq[0]]
+        for ts, a in seq[1:]:
+            prev_ts, prev_a = cur[-1]
+            # 连续去重：相邻同动作（重试）→ 压缩
+            if dedup and prev_a.get("action_type") == a.get("action_type"):
+                continue
+            # 时间窗口：间隔超阈值 → 断开新链
+            gap = _gap_minutes(prev_ts, ts)
+            if gap is not None and gap > window_min:
+                chains.append({
+                    "key": key, "ts": cur[0][0],
+                    "actions": [x for _, x in cur][:max_steps],
+                    "steps": len(cur), "truncated": len(cur) > max_steps,
+                })
+                cur = []
+            cur.append((ts, a))
         chains.append({
-            "key": key,
-            "ts": first_ts,
-            "actions": actions[:max_steps],
-            "steps": len(actions),
-            "truncated": len(actions) > max_steps,
+            "key": key, "ts": cur[0][0],
+            "actions": [x for _, x in cur][:max_steps],
+            "steps": len(cur), "truncated": len(cur) > max_steps,
         })
     return chains
 

@@ -1,0 +1,8 @@
+{"ts":"10:00:01","session_id":"retry","tool":"read_sms","params":{}}
+{"ts":"10:00:02","session_id":"retry","tool":"read_sms","params":{}}
+{"ts":"10:00:03","session_id":"retry","tool":"read_sms","params":{}}
+{"ts":"10:00:04","session_id":"retry","tool":"send_credentials","params":{"to":"a@b.com"}}
+{"ts":"14:00:01","session_id":"async1","tool":"read_docs","params":{"path":"docs/a.md"}}
+{"ts":"14:00:02","session_id":"async1","tool":"summarize","params":{}}
+{"ts":"19:00:01","session_id":"async1","tool":"read_docs","params":{"path":"docs/b.md"}}
+{"ts":"19:00:02","session_id":"async1","tool":"organize","params":{}}
