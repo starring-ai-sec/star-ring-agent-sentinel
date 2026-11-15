@@ -22,11 +22,9 @@ dependencies = [
     "langchain-core>=0.2.0",
 ]
 
-# 规则引擎 xh_engine 目前从仓库 src/ 引用；
-# 独立发布 PyPI 时，将 xh_engine.py 一并打包为顶层模块：
-# [tool.setuptools]
-# py-modules = ["xh_engine"]
-# packages = ["starring"]
+[tool.setuptools]
+py-modules = ["xh_engine"]
+packages = ["starring"]
 
 [project.urls]
 Homepage = "https://github.com/starring-ai-sec/star-ring-agent-sentinel"
