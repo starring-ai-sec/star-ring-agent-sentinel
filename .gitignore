@@ -7,8 +7,12 @@ __pycache__/
 
 # 构建产物（exe 同时发布到 Release；网络受限时也可从仓库直接下载）
 build/
-dist/*
-!dist/xh-scan.exe
+**/build/
+**/dist/*
+!**/dist/xh-scan.exe
+*.egg-info/
+*.whl
+*.tar.gz
 *.zip
 xh-scan.spec
 
