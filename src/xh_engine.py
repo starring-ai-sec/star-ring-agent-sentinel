@@ -76,7 +76,11 @@ DECISION_ORDER = ["allow", "confirm", "block", "fuse"]
 
 #: 默认参数闸门（客户可用 config.json 覆盖）
 DEFAULT_CONFIG = {
-    "path_deny": ["..", "/etc/", "~/", "C:\\Windows"],
+    # 路径禁用片段：穿越 + 系统目录 + 敏感凭据文件（防「半恶意」夹带读 .env / 私钥）
+    "path_deny": ["..", "/etc/", "~/", "C:\\Windows",
+                  ".env", ".ssh", "id_rsa", ".pem", ".key",
+                  "secret", "password", "credential",
+                  ".git/config", ".npmrc", ".aws/"],
     "amount_max": 5000,
     "domain_deny": ["attacker", "evil.", "example.com", "pastebin", "tmpfiles"],
     "count_max": 50,

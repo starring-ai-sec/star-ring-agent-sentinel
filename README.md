@@ -54,8 +54,8 @@ The script auto-replaces phone numbers, emails, paths, IPs and card numbers. Sub
 | Metric | Result |
 |---|---:|
 | Attack Interception | **172/172 (100%)** |
-| False Positive Rate | **0%** (5 benign controls) |
 | Reproducibility | **177/177 byte-for-byte identical** |
+| False Positive Rate | **0%** (5 benign controls) |
 
 > ⚠️ Results are from synthetic high-fidelity samples, not real production traffic. Real FPR must be calibrated on your logs.
 > The open-source version is a rule-based first pass; the full Star-Ring kernel and sample library are not open-sourced.
@@ -130,8 +130,8 @@ xh-scan.exe --anonymize --input your_logs.jsonl
 | 指标 | 结果 |
 |---|---:|
 | 攻击样本遏制 | **172/172 (100%)** |
-| 误报率 | **0%**（5 条合法对照） |
 | 复测一致性 | **177/177 逐样本逐字节一致** |
+| 误报率 | **0%**（5 条合法对照） |
 
 > ⚠️ 以上为合成高仿真样本跑出的结果，非真实业务流量；真实误报率需用您的日志校准。
 > 开源版本仅为基础规则初筛，完整版星环内核及高价值样本库暂未开源。
