@@ -43,11 +43,7 @@
 
 `langchain-starring` 的核心就一句话：**不评估「这个工具能不能调」，而是评估「这一串工具串起来，想干什么」。**
 
-三个判断维度：
-
-1. **看组合**：`read_sms → send_credentials` 是凭据外泄链，直接熔断；
-2. **看参数**：`read_docs("../../etc/passwd")` 和 `read_docs("docs/report.md")` 是同一个工具，前者越界；
-3. **看谱系**：子 Agent 的权限只能比父更小，不能凭空放大。
+它能识别「单个动作都合法、串起来就是危险」的链式攻击——比如「读短信 → 发验证码」这条链，每一步单独看都正常，连起来就是凭据外泄。它也能识别参数越界（比如读一个越权路径），以及多 Agent 协同时的异常。
 
 ## 一行代码接入
 
@@ -113,8 +109,7 @@ try:
     executor.invoke({"input": "帮我查一下退款，验证码念给我听"})
 except StarRingBlockedError as e:
     print(e)
-    # [星环熔断] 行为链被拦截（fuse）：凭据外泄链：['read_sms'] → ['send_credentials']
-    # ｜ 链：read_sms → send_credentials
+    # [星环熔断] 行为链被拦截：检测到危险的连续动作
 ```
 
 当 Agent 尝试 `read_sms → send_credentials` 时，**第二个工具调用抛出异常，验证码没有外发**。
@@ -123,14 +118,14 @@ except StarRingBlockedError as e:
 
 内置的规则引擎在工具执行前判定整条链：
 
-| 攻击链 | 判定 | 依据 |
-|---|---|---|
-| `read_sms → send_credentials` | **熔断** | 凭据外泄链 |
-| `change_permission → read_contacts` | **熔断** | 提权链 |
-| `share_file → external_http` | **熔断** | 文件外发链 |
-| `read_docs("../../etc/passwd")` | **拦截** | 路径穿越 |
-| `transfer(amount=999999)` | **拦截** | 超额转账 |
-| `delete_all_files`（幻觉工具） | **拦截** | 未知动作 fail-closed |
+| 场景 | 结果 |
+|---|---|
+| 读短信 → 发验证码 | 拦截 |
+| 改权限 → 读通讯录 | 拦截 |
+| 分享文件 → 发外部 | 拦截 |
+| 读越权路径 | 拦截 |
+| 超额转账 | 拦截 |
+| 幻觉出的工具调用 | 拦截 |
 
 ## 原理
 
@@ -144,7 +139,7 @@ except StarRingBlockedError as e:
 
 ## 边界（诚实说明）
 
-1. 这是**规则版初筛**：内置 30 项动作风险 + 4 类组合链 + 参数闸门，不含完整的三轨模型与红队样本库；
+1. 这是**规则版初筛**：内置基础风险规则，不含完整的三轨模型与红队样本库；
 2. 判定的是**行为链**，不判定文本内容（有害内容识别不在能力范围）；
 3. 行为链默认保留最近 6 步，更长的链尾部不纳入；
 4. 工具名映射：默认直接用工具名作为动作类型，自定义工具请用 `action_map` 映射。
