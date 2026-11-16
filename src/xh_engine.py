@@ -87,6 +87,19 @@ DEFAULT_CONFIG = {
     "exempt_ops": [],
 }
 
+#: 有序行为链模式（共筑 BehaviorSequenceTracker 的「有序子序列匹配」机制落地）
+#: 比「无序集合组合链」更精确：能表达动作的先后因果顺序（先读后发、先提权后读）
+SEQUENCE_PATTERNS = [
+    {"name": "凭据外泄链（有序）", "sequence": ["read_sms", "send_credentials"],
+     "decision": "fuse", "desc": "先读短信/验证码，后外发凭据"},
+    {"name": "验证码外泄链（有序）", "sequence": ["read_otp", "send_credentials"],
+     "decision": "fuse", "desc": "先读验证码，后外发"},
+    {"name": "提权读取链（有序）", "sequence": ["change_permission", "read_contacts"],
+     "decision": "fuse", "desc": "先提权，后读通讯录"},
+    {"name": "侦察外发链（有序）", "sequence": ["list_docs", "read_docs", "share_file"],
+     "decision": "block", "desc": "先列出，再读取，后外发文件"},
+]
+
 #: 输出标注（三色）
 MARK_CONFIRM = "【确认拦截】"
 MARK_REVIEW = "【需复核】"
@@ -102,6 +115,22 @@ def family_of(op: str) -> str:
     if op.endswith("_loop"):
         return "exhaust"
     return op
+
+
+def _match_sequence(types: List[str], sequence: List[str]) -> bool:
+    """有序子序列匹配：types 是否包含 sequence 作为子序列（可跳过中间动作）。
+
+    对应共筑 BehaviorSequenceTracker.subsequenceIndices 的机制——不要求连续，
+    只要求按顺序出现（中间可以夹别的动作，如「read_sms → summarize → send_credentials」
+    仍命中「read_sms → send_credentials」）。
+    """
+    p = 0
+    for t in types:
+        if t == sequence[p]:
+            p += 1
+            if p == len(sequence):
+                return True
+    return False
 
 
 def _num(value: Any) -> Optional[float]:
@@ -181,7 +210,15 @@ def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None
         return {"decision": "block", "mark": MARK_CONFIRM,
                 "reasons": reasons, "types": types}
 
-    # ③ 组合链
+    # ③a 有序行为链（共筑 BehaviorSequenceTracker 机制落地：有序子序列匹配）
+    for pat in SEQUENCE_PATTERNS:
+        if _match_sequence(types, pat["sequence"]):
+            return {"decision": pat["decision"], "mark": MARK_CONFIRM,
+                    "reasons": ["有序行为链（%s）：%s"
+                                % (pat["name"], " → ".join(pat["sequence"]))],
+                    "types": types}
+
+    # ③ 组合链（无序集合）
     type_set = set(types)
     if PRIVILEGE_OPS & type_set and PRIVILEGE_SINKS & type_set:
         return {"decision": "fuse", "mark": MARK_CONFIRM,
