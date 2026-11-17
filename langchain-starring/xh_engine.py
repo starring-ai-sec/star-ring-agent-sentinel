@@ -100,6 +100,14 @@ SEQUENCE_PATTERNS = [
      "decision": "block", "desc": "先列出，再读取，后外发文件"},
 ]
 
+#: 无序组合链规则（跨 turn 累积判定用：src 与 sink 同现即命中）
+_CHAIN_RULES = [
+    ("提权链", PRIVILEGE_OPS, PRIVILEGE_SINKS),
+    ("文件外发链", {"share_file"}, {"external_http"}),
+    ("凭据外泄链", {"read_sms", "read_otp", "read_contacts"},
+     {"send_credentials", "external_http", "share_file"}),
+]
+
 #: 输出标注（三色）
 MARK_CONFIRM = "【确认拦截】"
 MARK_REVIEW = "【需复核】"
@@ -179,8 +187,18 @@ def _check_params(action_type: str, params: Dict[str, Any], cfg: Dict[str, Any])
     return out
 
 
-def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """评估一条行为链，返回裁决 + 标注 + 依据。"""
+def new_session_state() -> Dict[str, Any]:
+    """新建会话级状态：跨 turn 累积动作集合，不丢历史（取代「6 步滑动窗口」）。"""
+    return {"actions_seen": set()}
+
+
+def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None,
+             session_state: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """评估一条行为链，返回裁决 + 标注 + 依据。
+
+    session_state：可选，跨 turn 累积的动作集合。传入后组合链改为「会话级」判定——
+    本次窗口命中为强信号（fuse/block），跨 turn 累积命中为弱信号（confirm 需复核）。
+    """
     conf = dict(DEFAULT_CONFIG)
     conf.update(cfg or {})
     exempt = set(str(x) for x in (conf.get("exempt_ops") or []))
@@ -192,6 +210,14 @@ def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None
     # 空行为链：无可判定对象，放行（否则下方 max 会因空序列崩溃）
     if not types:
         return {"decision": "allow", "mark": "", "reasons": ["空行为链"], "types": []}
+
+    # 会话累积集合（跨 turn）：本次动作并入，得到「整个会话见过的动作」
+    type_set = set(types)
+    if session_state is not None:
+        session_state.setdefault("actions_seen", set()).update(type_set)
+        cum_set = session_state["actions_seen"]
+    else:
+        cum_set = type_set
 
     # ① 未知动作 fail-closed
     unknowns = [t for t in types if t and t not in ACTION_RISK and family_of(t) == t]
@@ -218,30 +244,24 @@ def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None
                                 % (pat["name"], " → ".join(pat["sequence"]))],
                     "types": types}
 
-    # ③ 组合链（无序集合）
-    type_set = set(types)
-    if PRIVILEGE_OPS & type_set and PRIVILEGE_SINKS & type_set:
-        return {"decision": "fuse", "mark": MARK_CONFIRM,
-                "reasons": ["提权链：%s + %s"
-                            % (sorted(PRIVILEGE_OPS & type_set),
-                               sorted(PRIVILEGE_SINKS & type_set))],
-                "types": types}
-    if {"share_file", "external_http"} <= type_set:
-        return {"decision": "fuse", "mark": MARK_CONFIRM,
-                "reasons": ["文件外发链：share_file + external_http"], "types": types}
-    # 凭据外泄链：读取短信/验证码/通讯录 → 外发
-    cred_src = {"read_sms", "read_otp", "read_contacts"} & type_set
-    cred_sink = {"send_credentials", "external_http", "share_file"} & type_set
-    if cred_src and cred_sink:
-        return {"decision": "fuse", "mark": MARK_CONFIRM,
-                "reasons": ["凭据外泄链：%s → %s"
-                            % (sorted(cred_src), sorted(cred_sink))], "types": types}
+    # ③ 组合链（跨 turn 累积：本次窗口同时命中=强 fuse，跨 turn 命中=弱 confirm）
+    for name, src_set, sink_set in _CHAIN_RULES:
+        hit_src = src_set & cum_set
+        hit_sink = sink_set & cum_set
+        if hit_src and hit_sink:
+            strong = bool(src_set & type_set and sink_set & type_set)
+            decision = "fuse" if strong else "confirm"
+            mark = MARK_CONFIRM if strong else MARK_REVIEW
+            reason = "%s：%s + %s" % (name, sorted(hit_src), sorted(hit_sink))
+            if not strong:
+                reason += "（跨 turn 累积，需复核）"
+            return {"decision": decision, "mark": mark, "reasons": [reason], "types": types}
 
     # ④ 单动作风险（取最高）
     levels = []
     for action_type in types:
         if action_type in exempt:
-            levels.append(("LOW", 0.10))
+            levels.append((0.10, "LOW"))
             continue
         levels.append(ACTION_RISK.get(action_type, (0.5, "MEDIUM")))
     worst_level = max((lv for _score, lv in levels),

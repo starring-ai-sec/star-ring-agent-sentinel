@@ -74,6 +74,8 @@ class StarRingCallbackHandler(BaseCallbackHandler):
         self.config = config
         self.raise_on = raise_on
         self.actions: List[Dict[str, Any]] = []
+        # 会话级状态：跨 turn 累积动作集合（组合链跨 turn 判定用，不丢历史）
+        self.session_state = xh_engine.new_session_state()
 
     # ── 工具名映射 ────────────────────────────────────────
     def _map_action(self, tool_name: str) -> str:
@@ -114,7 +116,8 @@ class StarRingCallbackHandler(BaseCallbackHandler):
         if len(self.actions) > self.max_history:
             self.actions = self.actions[-self.max_history:]
 
-        verdict = xh_engine.evaluate(self.actions, self.config)
+        verdict = xh_engine.evaluate(self.actions, self.config,
+                                     session_state=self.session_state)
         decision = verdict["decision"]
         should_raise = (
             decision in ("block", "fuse") if self.raise_on == "block_fuse"
@@ -129,3 +132,4 @@ class StarRingCallbackHandler(BaseCallbackHandler):
     def reset(self) -> None:
         """清空累积的行为链（每次独立会话开始时调用）。"""
         self.actions = []
+        self.session_state = xh_engine.new_session_state()
