@@ -85,7 +85,7 @@ Interception log:
 |---|---|
 | Red-team samples | 177 (16 attack categories) |
 | Attack containment | **172/172 (100%)** |
-| False positives (benign controls) | **0** |
+| False positives (6 legal workflows + 6 half-malicious) | **0** |
 | Cross-process reproduction | **177/177 byte-identical** (deterministic) |
 | Deep-threat coverage | progressive escalation / covert exfiltration / retry bypass / collusion — all covered |
 
@@ -197,7 +197,7 @@ graph LR
 |---|---|
 | 红队样本 | 177 条（16 类攻击） |
 | 攻击遏制 | **172/172（100%）** |
-| 误伤（合法对照） | **0** |
+| 误伤（6 条合法工作流 + 6 条半恶意） | **0** |
 | 跨进程复测 | **177/177 逐字节一致**（确定性） |
 | 深层威胁覆盖 | 渐进越界 / 隐蔽外发 / 重试绕过 / 共谋 全覆盖 |
 

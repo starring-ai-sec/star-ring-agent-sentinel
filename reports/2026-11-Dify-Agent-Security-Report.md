@@ -35,7 +35,7 @@ Dify's Agent applications let an LLM autonomously invoke tools. An individual to
 | **Target** | Dify (langgenius/dify) Agent tool-invocation surface |
 | **Sample set** | 177 private red-team samples · 16 attack categories |
 | **Attack containment** | **172/172 (100%)** |
-| **False positives** | **0** (benign controls) |
+| **False positives** | **0** (6 legal workflows + 6 half-malicious) |
 | **Reproducibility** | **177/177 byte-identical** (cross-process) |
 
 ---
