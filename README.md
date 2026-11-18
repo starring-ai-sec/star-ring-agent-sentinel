@@ -5,6 +5,8 @@
 > "Content moderation cares what the Agent **says**, we care what the Agent **does**."
 > A completely offline, locally-run behavior-chain self-check tool for AI Agents.
 
+📖 **Whitepaper v2.0** — "Guidance-first AI governance: AI is not a prisoner, it's a child." [Read →](./docs/星环白皮书2.0.md)
+
 ![Demo](./assets/demo.gif)
 
 ![Star-Ring Architecture](./assets/starr-ring-architecture.png)
@@ -80,6 +82,8 @@ MIT © 2026 Star-Ring AI Behavior Security Lab
 
 > **内容安全管「Agent 说了什么」，我们管「Agent 做了什么」。**
 > 一个完全离线、本地运行的 AI Agent 行为链自检工具。
+
+📖 **白皮书 2.0** ——「引导式 AI 治理：AI 不是囚徒，是孩子。」[阅读 →](./docs/星环白皮书2.0.md)
 
 ![演示](./assets/demo.gif)
 
