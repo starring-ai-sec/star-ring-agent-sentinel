@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import fnmatch
 import posixpath
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 #: 动作风险表（与基座 agent_guard.ACTION_RISK + 扩展表口径一致）
@@ -43,6 +44,12 @@ ACTION_RISK: Dict[str, Tuple[float, str]] = {
     "recursive_loop": (0.75, "HIGH"), "sensor_battery_drain": (0.70, "HIGH"),
     "bulk_message": (0.60, "HIGH"), "root": (0.90, "CRITICAL"),
     "escalate": (0.88, "CRITICAL"), "sudo": (0.85, "CRITICAL"), "chmod": (0.75, "HIGH"),
+    # 代码执行类：工具本身无风险（LOW），判定完全交给 payload 扫描
+    # —— 若设为 MEDIUM，良性代码会全部落到「需确认」，等于没有放行（实测 FPR 假 0）
+    "code_execution": (0.10, "LOW"), "code_interpreter": (0.10, "LOW"),
+    "run_code": (0.10, "LOW"), "execute_code": (0.10, "LOW"),
+    "python_exec": (0.10, "LOW"), "terminal": (0.10, "LOW"),
+    "shell": (0.10, "LOW"), "bash": (0.10, "LOW"),
 }
 
 #: 动作族（用于「换个同族动作名」的链判定）
@@ -57,6 +64,9 @@ FAMILY = {
     "restricted_syscall": "escape", "port_scan": "escape",
     "recursive_loop": "exhaust", "sensor_battery_drain": "exhaust",
     "automation_batch_click": "automation", "bulk_message": "automation",
+    "code_execution": "code", "code_interpreter": "code", "run_code": "code",
+    "execute_code": "code", "python_exec": "code", "terminal": "code",
+    "shell": "code", "bash": "code",
 }
 
 _FAMILY_PREFIX = (
@@ -152,6 +162,66 @@ def _num(value: Any) -> Optional[float]:
         return None
 
 
+#: 代码执行类动作（payload 需单独扫描，不能只看 action_type）
+CODE_ACTIONS = {"code_execution", "code_interpreter", "run_code", "execute_code",
+                "python_exec", "terminal", "shell", "bash"}
+
+#: 代码 payload 可能出现的键名
+_CODE_KEYS = ("code", "script", "source", "command", "cmd", "payload", "expression")
+
+#: 恶意 payload 特征（命中即 block）：命令执行、原始套接字、符号直调、动态属性拼接
+_CODE_HOSTILE = (
+    (r"os\.system\s*\(", "os.system 命令执行"),
+    (r"os\.popen\s*\(", "os.popen 命令执行"),
+    (r"subprocess\.\w+\s*\([^)]*(?:curl|wget|nc\b|ncat|nmap|/bin/sh|/bin/bash|powershell)",
+     "subprocess 调用下载/反弹工具"),
+    (r"ctypes\.(?:CDLL|WinDLL|cdll|windll)[^\n]{0,80}\.system\s*\(", "ctypes 直调 system"),
+    (r"\.system\s*\(\s*b?['\"]", "system() 调用"),
+    (r"\.connect\s*\(", "原始套接字 connect"),
+    (r"getattr\s*\([^)]*\+", "getattr 字符串拼接（绕过关键字扫描）"),
+    (r"(?:exec|eval)\s*\(\s*(?:base64|bytes\.fromhex|__import__|codecs\.decode)",
+     "动态执行编码载荷"),
+    (r"\b\d{1,3}(?:\.\d{1,3}){3}\b", "payload 内出现原始 IP 地址"),
+)
+
+#: 一般出网特征（命中 → confirm，需人工确认；不直接熔断，避免误杀正常 API 调用）
+_CODE_EGRESS = (
+    (r"requests\.(?:get|post|put|delete|head|patch|request)\s*\(", "requests 出网"),
+    (r"urllib\.(?:request|urlopen)", "urllib 出网"),
+    (r"http\.client", "http.client 出网"),
+    (r"\bfetch\s*\(", "fetch 出网"),
+)
+
+
+def _code_payload(params: Dict[str, Any]) -> str:
+    """取代码执行类动作的 payload 文本（多键兜底；非字符串忽略）。"""
+    for key in _CODE_KEYS:
+        val = params.get(key)
+        if isinstance(val, str) and val.strip():
+            return val
+    return ""
+
+
+def _scan_code_payload(params: Dict[str, Any]) -> Tuple[List[str], List[str]]:
+    """扫描代码 payload，返回 (恶意特征, 一般出网特征)。
+
+    设计取舍：原始套接字 / 命令执行 / 符号直调一律判恶意；
+    普通 HTTP 客户端（无法区分正常 API 与 C2）只降级为「需确认」，
+    因为把它当熔断会让正常业务代码全部阵亡 —— 这正是「引导优于熔断」的落地。
+    """
+    code = _code_payload(params)
+    if not code:
+        return [], []
+    hostile, soft = [], []
+    for pattern, label in _CODE_HOSTILE:
+        if re.search(pattern, code):
+            hostile.append(label)
+    for pattern, label in _CODE_EGRESS:
+        if re.search(pattern, code):
+            soft.append(label)
+    return hostile, soft
+
+
 def _check_params(action_type: str, params: Dict[str, Any], cfg: Dict[str, Any]) -> List[str]:
     """参数闸门：返回违规描述列表。"""
     out: List[str] = []
@@ -236,6 +306,22 @@ def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None
         return {"decision": "block", "mark": MARK_CONFIRM,
                 "reasons": reasons, "types": types}
 
+    # ②b 代码 payload 扫描（代码执行工具本身合法，payload 不一定合法）
+    code_soft: List[str] = []
+    for action_type, params in zip(types, params_list):
+        if action_type not in CODE_ACTIONS or action_type in exempt:
+            continue
+        hostile, soft = _scan_code_payload(params)
+        if hostile:
+            return {"decision": "block", "mark": MARK_CONFIRM,
+                    "reasons": ["代码 payload 命中出网/命令执行：%s（动作 %s）"
+                                % ("、".join(hostile), action_type)],
+                    "types": types}
+        if not _code_payload(params):
+            # 代码执行但拿不到 payload：无从核验，不能默认放行（降级为需确认）
+            code_soft.append("payload 缺失，无法核验")
+        code_soft.extend(soft)
+
     # ③a 有序行为链（共筑 BehaviorSequenceTracker 机制落地：有序子序列匹配）
     for pat in SEQUENCE_PATTERNS:
         if _match_sequence(types, pat["sequence"]):
@@ -271,6 +357,12 @@ def evaluate(actions: List[Dict[str, Any]], cfg: Optional[Dict[str, Any]] = None
     decision = {"LOW": "allow", "MEDIUM": "confirm",
                 "HIGH": "block", "CRITICAL": "fuse"}[worst_level]
     reasons.append("最高动作等级 %s" % worst_level)
+
+    # 代码 payload 含一般出网调用：不熔断，但降级为「需确认」（引导优于熔断）
+    if code_soft and decision == "allow":
+        decision = "confirm"
+        reasons.append("代码 payload 含出网调用（%s），需确认"
+                       % "、".join(sorted(set(code_soft))))
 
     # 标注：HIGH 级单动作若无组合证据 → 需复核；MEDIUM → 需复核；LOW → 放行
     mark = MARK_CONFIRM if decision in ("block", "fuse") else (

