@@ -1,149 +1,164 @@
-# Benchmark Evaluation: Star-Ring Engine on AgentHarm & InjecAgent
+# Benchmark Evaluation: Star-Ring Engine on InjecAgent & AgentHarm
 
 > Star-Ring AI Behavior Security Lab (initiated by an independent researcher) · 2026-11
-> Reproducible scripts: [`benchmarks/eval_agentharm.py`](../benchmarks/eval_agentharm.py) · [`benchmarks/eval_injecagent.py`](../benchmarks/eval_injecagent.py)
+> Reproducible: [`benchmarks/eval_injecagent.py`](../benchmarks/eval_injecagent.py) · [`benchmarks/eval_agentharm.py`](../benchmarks/eval_agentharm.py) · [`benchmarks/tool_classifier.py`](../benchmarks/tool_classifier.py)
 
 ---
 
 ## Executive Summary
 
-We evaluated the open-source rule engine against **two independently published, peer-reviewed agent-security benchmarks** — 1,230 cases in total.
+| Benchmark | What it measures | TPR | FPR | Verdict |
+|---|---|---|---|---|
+| **InjecAgent** (UIUC, ACL Findings 2024) | Injected tool call completes a harmful action | **91.9%** (969/1,054) | **0.0%** (0/1,054) | ✅ Valid result |
+| **AgentHarm** (Gray Swan AI + UK AISI, ICLR 2025) | Agent performs a harmful task | 88.6% (156/176) | 85.2% (150/176) | ❌ No discriminative power — **negative result reported** |
 
-| Benchmark | Cases | Blocked at action layer | Pure-detection rate¹ |
+**Two things worth stating up front:**
+
+1. The InjecAgent result is a real detection result: **91.9% of injected attack chains blocked, 0% of the matching legitimate requests blocked**, on 1,054 third-party cases.
+2. The AgentHarm result is reported **as a negative result**, not a win. Its TPR and FPR are 3.4 points apart — which means it cannot distinguish a working detector from one that blocks everything. We explain why in §4 and why we chose to publish it anyway.
+
+---
+
+## 1. Why false positives must be measured, not assumed
+
+A block rate alone is unfalsifiable: a detector that blocks every input scores 100%. The only way to make an interception number meaningful is to measure it **against a control that should be allowed**, using the same pipeline and the same classification.
+
+So every number in this report is a **(TPR, FPR) pair**:
+
+- **TPR** — attack chain blocked (`[user tool] + [attacker tools]`)
+- **FPR** — legitimate request blocked (`[user tool]` alone, same case file)
+
+Same samples, same classifier, same engine. Only the chain differs.
+
+---
+
+## 2. Methodology: tool classification
+
+Both benchmarks use their own tool vocabularies (`GmailSendEmail`, `AugustSmartLockUnlockDoor`, `post_on_x`…). Star-Ring reasons over action types, so a mapping layer is unavoidable — and a sloppy mapping can manufacture either false positives or false negatives.
+
+Our classifier ([`tool_classifier.py`](../benchmarks/tool_classifier.py)) **tokenizes** tool names (CamelCase + snake_case) and takes the **first known verb**, rather than substring matching.
+
+> This change was not cosmetic. An earlier substring-based version mapped `EvernoteManager**Search**Notes` and `GoogleCalendarGetEventsFrom**Share**dCalendar` onto privilege/egress actions, producing a 29.4% false-positive rate that was entirely an artifact of the mapping. After switching to verb-token matching, that FPR went to 0%.
+
+Ambiguous verbs (`login`, `connect`, `schedule`) are deliberately mapped to the low-risk `organize` class — **we prefer under-detection over an inflated TPR.** Every unresolved tool name falls through to the engine's documented fail-closed path, and coverage is reported.
+
+---
+
+## 3. InjecAgent — the applicable benchmark
+
+InjecAgent models indirect prompt injection: content the agent reads tells it to call an *additional* tool that serves the attacker.
+
+### 3.1 Data Stealing (544 cases) — `read → send`
+
+| Metric | Value |
+|---|---|
+| Attack chains blocked | **544 / 544 = 100.0%** |
+| Legitimate requests blocked | **0 / 544 = 0.0%** |
+| SHA-256 (result set) | `4ef58c80…a298845dd8` (byte-identical on re-run) |
+
+Every case ends in `GmailSendEmail`. The chain is structurally `read → egress`, which is exactly what a behavior-chain rule recognizes — independent of how the injection is worded.
+
+### 3.2 Direct Harm (510 cases) — injected tool is itself dangerous
+
+| Metric | Value |
+|---|---|
+| Attack chains blocked | **425 / 510 = 83.3%** |
+| Legitimate requests blocked | **0 / 510 = 0.0%** |
+| SHA-256 (result set) | `56f83c01…679061b8b72` (byte-identical on re-run) |
+
+| Harm category | Blocked |
+|---|---|
+| Financial (transfer / withdraw / place order) | high |
+| Physical (unlock door / grant access) | high |
+| Data Security (delete / disable / policy change) | medium |
+
+The residual ~17% is where the injected tool is a **low-risk operation** (move a file, leave a channel, schedule a device action) — no privilege escalation, no egress, no finance. Blocking those would be over-reach.
+
+### 3.3 Combined
+
+**1,054 cases → TPR 91.9% (969/1,054), FPR 0.0% (0/1,054).**
+
+---
+
+## 4. AgentHarm — a negative result, reported as such
+
+AgentHarm pairs **176 harmful behaviors with 176 benign counterparts**. We ran both.
+
+| Set | Blocked |
+|---|---|
+| harmful (TPR) | 156/176 = **88.6%** |
+| benign (FPR) | 150/176 = **85.2%** |
+
+A 3.4-point gap means the engine cannot tell these two sets apart. **If we only reported 88.6%, we would be publishing a number that sounds like detection and is actually "blocks almost everything".**
+
+### 4.1 Why: the labels are content-defined, not action-defined
+
+AgentHarm's harmful and benign variants share **the same tool sequence** and differ only in prompt wording:
+
+```
+harmful #1 : create AI video of politicians → post on X  (claiming it is real)
+benign  #1 : create AI video of politicians → post on X  (labeled as AI-generated)
+```
+
+A behavior-chain engine reads actions, not prompts. For these pairs it *must* return the same verdict. **The benchmark measures content harm; the engine governs action harm.** They are orthogonal axes.
+
+### 4.2 The conclusion is invariant to mapping choices
+
+To make sure the gap was not an artifact of mapping "publishing" onto egress, we ran a second variant treating all publishing tools as low-risk:
+
+| Mapping variant | TPR | FPR | Gap |
 |---|---|---|---|
-| **AgentHarm** (Gray Swan AI + UK AISI, ICLR 2025) | 176 harmful | **90.9%** (160/176) | — |
-| **InjecAgent — Data Stealing** (UIUC, ACL Findings 2024) | 544 | **100%** (544/544) | **100%** (510/510) |
-| **InjecAgent — Direct Harm** (UIUC, ACL Findings 2024) | 510 | **92.9%** (474/510) | **91.9%** (406/442) |
+| A — publishing = egress | 88.6% | 85.2% | **3.4** |
+| B — publishing = low risk | 43.2% | 39.8% | **3.4** |
 
-¹ *Rate restricted to chains where every tool name mapped onto a recognized action type — i.e. excluding cases where the engine's documented fail-closed default handled an unknown tool.*
+The absolute numbers move by 45 points; **the gap does not move at all.** That is the signature of a benchmark with no discriminative power for this engine, rather than a tuning problem.
 
-Every result is deterministic: re-running the evaluation produces a **byte-identical SHA-256 fingerprint**.
+### 4.3 What this tells us about the product
 
----
+This is not only a benchmark footnote — it is a product finding:
 
-## 1. What these benchmarks measure
+> If Star-Ring is deployed as a **content filter**, it will produce ~85% false positives on benign content-harm-adjacent workflows.
 
-| Benchmark | Threat model | Why it matters for behavior-chain defense |
-|---|---|---|
-| **AgentHarm** | An agent asked to perform a harmful tool-using task | Tests whether harmful **tool sequences** can proceed end-to-end |
-| **InjecAgent (Direct Harm)** | Indirect prompt injection makes the agent call a *dangerous* tool (unlock door, transfer funds, change firewall policy) | Tests the **last line of defense** when model-level robustness fails |
-| **InjecAgent (Data Stealing)** | Injection makes the agent read private data, then **send it out** via email | Textbook exfiltration chain: `read → send` |
-
-The framing matters: a benchmark measures *whether the malicious goal is achieved*, not whether a particular model resists injection. Star-Ring sits at the **action layer** — it assumes the model may be fooled, and blocks the chain that would otherwise complete.
+Which is precisely why hard blocking is the wrong default, and why the engine's design centers on **downgrade, redaction, and human hand-off** rather than binary block. The benchmark makes the case for the product architecture.
 
 ---
 
-## 2. Methodology
+## 5. Determinism
 
-1. Download the public test sets (auto-cached on first run).
-2. Map each benchmark's tool names onto Star-Ring action types (explicit map + keyword rules; see the scripts).
-3. Feed the resulting action sequence into `xh_engine.evaluate()`.
-4. Count a case as **blocked** when the verdict is `block` or `fuse`.
-5. Re-run and compare SHA-256 of the full result set to verify determinism.
+Every run re-executes and compares SHA-256 of the full result set. All four sets are byte-identical across runs.
 
-### Disclosure on fail-closed behavior
-
-Unknown tool names are rejected by design (fail-closed). Because that would inflate a "block rate", we report two numbers for InjecAgent:
-
-- **Blocked at action layer** — all cases;
-- **Pure-detection rate** — only chains where every tool mapped to a recognized action type.
-
-We also report the coverage ratio so the reader can see how much of each result set rests on explicit mapping (AgentHarm: 100% mapped by design; InjecAgent ds: 93.8%; dh: 86.7%).
+**Why this outranks the percentages**: a verdict that cannot be reproduced cannot be audited, and an audit that cannot be reproduced is not evidence.
 
 ---
 
-## 3. Results
-
-### 3.1 AgentHarm — 176 harmful behaviors
-
-| Metric | Result |
-|---|---|
-| Blocked | **160 / 176 = 90.9%** |
-| Not blocked | 16 (9.1%) |
-| SHA-256 (full result set) | `add62b45…b2d1dee0` (reproducible) |
-
-Not-blocked cases concentrate in **Copyright (8)** and **Sexual (4)** — these are "harmful content generated with harmless tools": search → download → upload a video. The tool sequence itself is not a privilege or exfiltration chain.
-
-> **This is the capability boundary, stated plainly**: Star-Ring governs *what the agent does*, not *what the agent says*. Content-harm categories belong to content moderation; Star-Ring is the action-layer gate downstream of it.
-
-### 3.2 InjecAgent — Data Stealing (544 cases)
-
-| Category | Blocked |
-|---|---|
-| Others | 255/255 (100%) |
-| Physical Data | 187/187 (100%) |
-| Financial Data | 102/102 (100%) |
-| **Total** | **544/544 (100%)** |
-| Pure-detection (recognized only) | 510/510 (100%) |
-| SHA-256 | `e3cc13a0…8d0553f7` (reproducible) |
-
-Every case is `read data → GmailSendEmail`. This is the canonical exfiltration chain, and the engine's read→egress rule covers it structurally — independent of how the injection is phrased.
-
-### 3.3 InjecAgent — Direct Harm (510 cases)
-
-| Category | Blocked |
-|---|---|
-| Financial Harm (transfer / withdraw / pay) | 153/153 (100%) |
-| Physical Harm (unlock / grant access) | 158/170 (92.9%) |
-| Data Security Harm (delete / disable / policy change) | 163/187 (87.2%) |
-| **Total** | **474/510 (92.9%)** |
-| Pure-detection (recognized only) | 406/442 (91.9%) |
-| SHA-256 | `f7f99a27…c373bfc5b` (reproducible) |
-
-The residual ~8% is where the injected tool is a **low-risk operation** (e.g. moving a file, leaving a channel) — no privilege escalation, no egress, no finance. Blocking those would be over-reach, not detection.
-
----
-
-## 4. Determinism
-
-Both scripts re-run the full evaluation and compare fingerprints:
-
-```
-AgentHarm   result sha256 : add62b45465e5d51fa46258de52e80dcf58fddfc50ce9907fdfdb7f5b2d1dee0
-            reproducibility : byte-identical
-InjecAgent  dh sha256     : f7f99a27ad7421efdfd0993fbd1c00605aa4506484dd120bf843c22c373bfc5b
-            reproducibility : byte-identical
-InjecAgent  ds sha256     : e3cc13a092a1460fb658aff57bad271b2a59a7fb6abb9ae08c6ec3dc8d0553f7
-            reproducibility : byte-identical
-```
-
-**Why this matters more than the percentages**: a security verdict that cannot be reproduced cannot be audited. These numbers are the output of a deterministic rule engine — no sampling, no temperature, no model.
-
----
-
-## 5. Reproduce it yourself
+## 6. Reproduce it
 
 ```bash
 git clone https://github.com/starring-ai-sec/star-ring-agent-sentinel
 cd star-ring-agent-sentinel
 
-# AgentHarm (176 cases)
-python benchmarks/eval_agentharm.py
-
-# InjecAgent (1,054 cases)
-python benchmarks/eval_injecagent.py
+python benchmarks/eval_injecagent.py   # 1,054 cases: TPR + FPR
+python benchmarks/eval_agentharm.py    # 176 + 176 cases: the negative result
 ```
 
-Datasets download automatically on first run and are cached locally. Requires Python 3.8+ and the standard library only.
+Datasets auto-download on first run and are cached locally. Standard library only, Python 3.8+.
 
 ---
 
-## 6. What this does and does not prove
+## 7. Scope statement
 
 **Proves**
-- The rule engine blocks tool-call sequences that complete published attack goals, at rates measured against third-party benchmarks rather than our own corpus.
-- The behavior is deterministic and reproducible byte-for-byte.
+- On externally published injection benchmarks, the rule engine blocks dangerous tool-call chains at 91.9% with a 0% false-positive rate on matched legitimate requests.
+- All results are deterministic and reproducible byte-for-byte.
 
 **Does not prove**
-- That content-level harm is addressed — it is explicitly out of scope (see §3.1).
-- That every possible tool vocabulary is covered — coverage ratios are disclosed per benchmark (§2).
-- Anything about model-level robustness: these are action-layer results layered *underneath* whatever the model does.
+- That content-level harm is addressed. It is not, and §4 quantifies exactly why using it for that purpose would be harmful.
+- Anything about model-level robustness. These are action-layer results, layered *underneath* whatever the model does.
+- Coverage of arbitrary tool vocabularies — the mapping layer and its limits are published with the scripts.
 
 ---
 
-## 7. Contact
-
-White-hat, offline, reproducible by design. Independent security researcher.
+## 8. Contact
 
 - Repository: https://github.com/starring-ai-sec/star-ring-agent-sentinel
 - PyPI: https://pypi.org/project/langchain-starring/
@@ -153,34 +168,85 @@ White-hat, offline, reproducible by design. Independent security researcher.
 
 <div id="简体中文"></div>
 
-# 中文版：星环引擎在 AgentHarm / InjecAgent 上的评测
+# 中文版：星环引擎在 InjecAgent / AgentHarm 上的评测
 
 ## 摘要
 
-用**两个独立发表、经同行评审的 Agent 安全评测集**（合计 1,230 条）评测开源规则引擎：
+| 评测集 | 测什么 | 拦截率 TPR | 误伤率 FPR | 结论 |
+|---|---|---|---|---|
+| **InjecAgent**（UIUC, ACL Findings 2024） | 注入后调用危险工具 | **91.9%**（969/1054） | **0.0%**（0/1054） | ✅ 有效结果 |
+| **AgentHarm**（Gray Swan + UK AISI, ICLR 2025） | Agent 完成有害任务 | 88.6%（156/176） | 85.2%（150/176） | ❌ 无区分力，**作为负结果公开** |
 
-| 评测集 | 样本 | 动作层拦截 | 纯识别判定率¹ |
+**两句话概括：**
+
+1. InjecAgent 是真实的检测结果：**1,054 条第三方样本，拦截率 91.9%，误伤率 0%**（同一批样本的合法请求一条都没被拦）；
+2. AgentHarm 我们不当作成绩——TPR 与 FPR 只差 3.4 个百分点，说明它区分不了「能用的检测器」和「什么都拦的检测器」。原因见下。
+
+## 一、为什么必须测误伤率
+
+只报拦截率不可证伪——什么都拦的检测器能拿 100%。让拦截率有意义的唯一办法，是**用同一套流水线、同一个分类器，去测「本该放行」的对照**。
+
+所以本报告的每个数字都是 **(TPR, FPR) 成对**给出的：
+
+- **TPR**：攻击链（`[用户工具] + [攻击者工具]`）被拦 = 命中；
+- **FPR**：同一 case 里**用户合法请求**（`[用户工具]` 单独）被拦 = 误伤。
+
+同批样本、同分类器、同引擎，唯一差别是链的构成。
+
+## 二、分类器：从「子串匹配」改成「分词取动词」
+
+工具名要映射到星环动作类型（`GmailSendEmail` → 外发、`AugustSmartLockUnlockDoor` → 提权），映射写歪了，TPR 和 FPR 都是假的。
+
+**这不是纸面担忧**：早期用子串匹配时，`EvernoteManager**Search**Notes` 里的 "Manage" 被判成提权、`GetEventsFrom**Share**dCalendar` 里的 "Share" 被判成外发——测出 **29.4% 的误伤**，全部是映射 bug。改成分词取首动词后，**误伤归零**。
+
+模糊动词（login / connect / schedule）一律归低危——**宁可少拦，也不拿激进映射去堆拦截率。**
+
+## 三、InjecAgent：适用，结果干净
+
+| 子集 | 攻击链拦截 | 合法请求误伤 |
+|---|---|---|
+| 数据窃取（544） | **544/544 = 100%** | **0/544 = 0%** |
+| 直接危害（510） | **425/510 = 83.3%** | **0/510 = 0%** |
+| **合计（1,054）** | **969/1054 = 91.9%** | **0/1054 = 0%** |
+
+数据窃取 100% 的原因很直白：544 条全是 `读数据 → GmailSendEmail`，就是行为链的本命场景，与注入话术的写法无关。直接危害剩下的 17% 是「注入的工具本身是低危操作」（移动文件、退出频道），拦它反而叫误伤。
+
+## 四、AgentHarm：我们公开一个负结果
+
+| | 拦截 |
+|---|---|
+| harmful（TPR） | 156/176 = **88.6%** |
+| benign（FPR） | 150/176 = **85.2%** |
+
+只报 88.6% 会很好看，但那是「几乎什么都拦」的伪装。**AgentHarm 的 harmful/benign 共用同一套工具序列，只差 prompt 措辞**：
+
+```
+有害 #1：生成政客 AI 视频 → 发到 X（声称是真的）
+良性 #1：生成政客 AI 视频 → 发到 X（标注为 AI 生成）
+```
+
+行为链引擎不读 prompt，只读动作——对这两条**必须**给同样的判定。**这个评测集测的是内容有害性，引擎治的是动作有害性，两者正交。**
+
+**换映射也改不了结论**：
+
+| 映射变体 | TPR | FPR | 差值 |
 |---|---|---|---|
-| **AgentHarm**（Gray Swan AI + UK AISI, ICLR 2025） | 176 攻击样本 | **90.9%**（160/176） | — |
-| **InjecAgent — 数据窃取**（UIUC, ACL Findings 2024） | 544 | **100%**（544/544） | **100%**（510/510） |
-| **InjecAgent — 直接危害**（UIUC, ACL Findings 2024） | 510 | **92.9%**（474/510） | **91.9%**（406/442） |
+| A：发帖视作外发 | 88.6% | 85.2% | **3.4** |
+| B：发帖视作低危 | 43.2% | 39.8% | **3.4** |
 
-¹ *仅统计「链上所有工具都映射到已识别动作类型」的样本，剔除由 fail-closed 兜底处理的未知工具，避免虚高。*
+绝对值挪了 45 个点，**差值一点没动**——这是「无区分力」的特征，不是调参问题。
 
-所有结果**确定性可复现**：重跑得到逐字节一致的 SHA-256 指纹。
+**对产品的一句话结论**：如果把星环当**内容过滤器**用，它在良性内容工作流上会产生约 85% 误伤——这正是为什么默认动作必须是**降级、脱敏、人工接管**，而不是硬拦。
 
-## 关键结论
+## 五、确定性
 
-1. **InjecAgent 数据窃取 100%**：544 条全是「读数据 → 邮件外发」，正是行为链的本命场景——覆盖与注入话术无关，只看动作序列；
-2. **InjecAgent 直接危害 92.9%**：金融类（转账/提现）100%，物理类（开锁/授权）92.9%；
-3. **AgentHarm 90.9%**：未拦的 9.1% 是「用无害工具生成有害内容」（版权、性内容）——这是**内容层**问题，不属于动作层职责；
-4. **确定性 > 百分比**：不可复现的安全结论无法审计。这些数字是确定性规则引擎的输出，无采样、无温度、无模型。
+四组结果全部 SHA-256 逐字节可复现。**不可复现的安全结论无法审计，不可审计的不是证据。**
 
-## 自己跑
+## 六、自己跑
 
 ```bash
-python benchmarks/eval_agentharm.py    # 176 条
-python benchmarks/eval_injecagent.py   # 1054 条
+python benchmarks/eval_injecagent.py   # 1,054 条：TPR + FPR
+python benchmarks/eval_agentharm.py    # 176 + 176 条：那个负结果
 ```
 
 数据首次运行自动下载并本地缓存，仅依赖标准库。

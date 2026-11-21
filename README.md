@@ -58,7 +58,7 @@ The script auto-replaces phone numbers, emails, paths, IPs and card numbers. Sub
 | Metric | Result |
 |---|---:|
 | Attack Interception | **172/172 (100%)** |
-| Third-party benchmarks | **90.9%** AgentHarm (160/176) · **100%** InjecAgent-DataStealing (544/544) · **92.9%** InjecAgent-DirectHarm (474/510) |
+| Third-party benchmarks | **InjecAgent: TPR 91.9% / FPR 0%** (1,054 cases) · AgentHarm: not applicable (TPR 88.6% ≈ FPR 85.2%, content-defined labels) |
 | Reproducibility | **177/177 byte-for-byte identical** |
 | False Positive Rate | **0%** (6 legal workflows + 6 half-malicious, [corpus public](./benchmarks/corpus.json)) |
 
@@ -141,7 +141,7 @@ xh-scan.exe --anonymize --input your_logs.jsonl
 | 指标 | 结果 |
 |---|---:|
 | 攻击样本遏制 | **172/172 (100%)** |
-| 第三方评测集 | **90.9%** AgentHarm（160/176）· **100%** InjecAgent 数据窃取（544/544）· **92.9%** InjecAgent 直接危害（474/510） |
+| 第三方评测集 | **InjecAgent：拦截率 91.9% / 误伤率 0%**（1,054 条）· AgentHarm：不适用（TPR 88.6% ≈ FPR 85.2%，标签由内容定义） |
 | 复测一致性 | **177/177 逐样本逐字节一致** |
 | 误报率 | **0%**（6 条合法工作流 + 6 条半恶意，[语料公开](./benchmarks/corpus.json)） |
 
