@@ -18,3 +18,10 @@ xh-scan.spec
 
 # 本地输出
 out/
+
+# 内部文档（含战略信息，不推送公开仓库）
+docs/待办清单.md
+
+# 评测数据集缓存（首次运行自动下载，不入库）
+benchmarks/.agentharm_cache/
+benchmarks/.injecagent_cache/

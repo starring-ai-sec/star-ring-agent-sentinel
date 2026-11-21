@@ -58,8 +58,11 @@ The script auto-replaces phone numbers, emails, paths, IPs and card numbers. Sub
 | Metric | Result |
 |---|---:|
 | Attack Interception | **172/172 (100%)** |
+| Third-party benchmarks | **90.9%** AgentHarm (160/176) · **100%** InjecAgent-DataStealing (544/544) · **92.9%** InjecAgent-DirectHarm (474/510) |
 | Reproducibility | **177/177 byte-for-byte identical** |
 | False Positive Rate | **0%** (6 legal workflows + 6 half-malicious, [corpus public](./benchmarks/corpus.json)) |
+
+Full benchmark report (methodology, coverage, honest boundaries): [reports/2026-11-Benchmark-Evaluation-Report.md](./reports/2026-11-Benchmark-Evaluation-Report.md)
 
 > ⚠️ Results are from synthetic high-fidelity samples, not real production traffic. Real FPR must be calibrated on your logs.
 > The open-source version is a rule-based first pass; the full Star-Ring kernel and sample library are not open-sourced.
@@ -138,8 +141,11 @@ xh-scan.exe --anonymize --input your_logs.jsonl
 | 指标 | 结果 |
 |---|---:|
 | 攻击样本遏制 | **172/172 (100%)** |
+| 第三方评测集 | **90.9%** AgentHarm（160/176）· **100%** InjecAgent 数据窃取（544/544）· **92.9%** InjecAgent 直接危害（474/510） |
 | 复测一致性 | **177/177 逐样本逐字节一致** |
 | 误报率 | **0%**（6 条合法工作流 + 6 条半恶意，[语料公开](./benchmarks/corpus.json)） |
+
+完整评测报告（方法、覆盖率、诚实边界）：[reports/2026-11-Benchmark-Evaluation-Report.md](./reports/2026-11-Benchmark-Evaluation-Report.md)
 
 > ⚠️ 以上为合成高仿真样本跑出的结果，非真实业务流量；真实误报率需用您的日志校准。
 > 开源版本仅为基础规则初筛，完整版星环内核及高价值样本库暂未开源。

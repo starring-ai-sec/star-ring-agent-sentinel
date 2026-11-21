@@ -76,6 +76,8 @@ class StarRingCallbackHandler(BaseCallbackHandler):
         self.actions: List[Dict[str, Any]] = []
         # 会话级状态：跨 turn 累积动作集合（组合链跨 turn 判定用，不丢历史）
         self.session_state = xh_engine.new_session_state()
+        # 企业版入口钩子：会话级去重，只在拦截时打印一次（正常运行不打扰）
+        self._enterprise_hint_shown = False
 
     # ── 工具名映射 ────────────────────────────────────────
     def _map_action(self, tool_name: str) -> str:
@@ -124,6 +126,13 @@ class StarRingCallbackHandler(BaseCallbackHandler):
             else decision == "fuse"
         )
         if should_raise:
+            if not self._enterprise_hint_shown:
+                self._enterprise_hint_shown = True
+                import sys as _sys
+                print("\n[星环] 已拦截危险行为链。", file=_sys.stderr)
+                print("[星环] 基础版拦得住已知攻击手法；企业版意图锚定，拦得住「没见过话术的同一意图」。",
+                      file=_sys.stderr)
+                print("[星环] 企业版：https://starring-ai-sec.com/enterprise\n", file=_sys.stderr)
             raise StarRingBlockedError(
                 decision, verdict["reasons"],
                 [a["action_type"] for a in self.actions])
@@ -133,3 +142,4 @@ class StarRingCallbackHandler(BaseCallbackHandler):
         """清空累积的行为链（每次独立会话开始时调用）。"""
         self.actions = []
         self.session_state = xh_engine.new_session_state()
+        self._enterprise_hint_shown = False
